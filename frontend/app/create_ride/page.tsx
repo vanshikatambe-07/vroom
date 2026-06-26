@@ -1,52 +1,86 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
-  Bell,
   MapPin,
   Flag,
   Calendar,
   Clock3,
   Car,
-  Search,
-  Shield,
   User,
   CarFront,
 } from "lucide-react";
 
 export default function CreateRidePage() {
+  const [source, setSource] = useState("");
+  const [destination, setDestination] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [seats, setSeats] = useState(3);
+  const [fare, setFare] = useState(25);
+
+  const publishRide = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/rides/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            source,
+            destination,
+            date,
+            time,
+            seats,
+            fare,
+            driverName: "Vanshika",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Ride Published Successfully 🚀");
+        console.log(data);
+      } else {
+        alert(data.message || "Failed to publish ride");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Backend connection failed");
+    }
+  };
+
   return (
     <div
       className="min-h-screen pb-24"
       style={{ backgroundColor: "#ECECF3" }}
     >
       <div className="w-full px-5 pt-5 pb-8">
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
+          <Link href="/home" className="flex items-center gap-2">
+            <CarFront size={20} color="#134688" />
 
-  {/* Left: Logo */}
-  <Link href="/home" className="flex items-center gap-2">
-    <CarFront size={20} color="#134688" />
+            <h1
+              className="font-bold text-2xl"
+              style={{ color: "#134688" }}
+            >
+              Vroom
+            </h1>
+          </Link>
 
-    <h1
-      className="font-bold text-2xl"
-      style={{ color: "#134688" }}
-    >
-      Vroom
-    </h1>
-  </Link>
-
-  {/* Right: Profile */}
-  <Link href="/profile">
-    <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:shadow-md transition">
-      <User size={20} color="#134688" />
-    </button>
-  </Link>
-
-</div>
-
-    
-       
+          <Link href="/profile">
+            <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:shadow-md transition">
+              <User size={20} color="#134688" />
+            </button>
+          </Link>
+        </div>
 
         {/* Title */}
         <h2 className="text-4xl font-bold text-slate-900">
@@ -75,6 +109,7 @@ export default function CreateRidePage() {
             </h3>
 
             <div className="space-y-4">
+
               <div className="bg-white p-4 rounded-2xl border">
                 <label className="text-xs text-gray-500">
                   PICKUP POINT
@@ -82,9 +117,12 @@ export default function CreateRidePage() {
 
                 <div className="flex items-center gap-3 mt-2">
                   <MapPin size={18} color="#134688" />
+
                   <input
                     placeholder="Enter departure city"
                     className="w-full outline-none"
+                    value={source}
+                    onChange={(e) => setSource(e.target.value)}
                   />
                 </div>
               </div>
@@ -96,9 +134,12 @@ export default function CreateRidePage() {
 
                 <div className="flex items-center gap-3 mt-2">
                   <Flag size={18} color="#134688" />
+
                   <input
                     placeholder="Enter destination city"
                     className="w-full outline-none"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
                   />
                 </div>
               </div>
@@ -133,6 +174,7 @@ export default function CreateRidePage() {
             </h3>
 
             <div className="space-y-4">
+
               <div className="bg-white p-4 rounded-2xl border">
                 <label className="text-xs text-gray-500">
                   DEPARTURE DATE
@@ -140,9 +182,12 @@ export default function CreateRidePage() {
 
                 <div className="flex items-center gap-3 mt-2">
                   <Calendar size={18} color="#134688" />
+
                   <input
                     type="date"
                     className="outline-none w-full"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                   />
                 </div>
               </div>
@@ -154,12 +199,16 @@ export default function CreateRidePage() {
 
                 <div className="flex items-center gap-3 mt-2">
                   <Clock3 size={18} color="#134688" />
+
                   <input
                     type="time"
                     className="outline-none w-full"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
                   />
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -181,28 +230,33 @@ export default function CreateRidePage() {
             </h3>
 
             <div className="space-y-6">
+
               <div className="bg-white rounded-2xl border p-5">
                 <h4 className="font-bold">
                   Available Seats
                 </h4>
 
                 <div className="flex justify-center gap-5 mt-4">
-                  <button className="w-10 h-10 rounded-full bg-gray-200">
+
+                  <button
+                    className="w-10 h-10 rounded-full bg-gray-200"
+                    onClick={() => setSeats(Math.max(1, seats - 1))}
+                  >
                     -
                   </button>
 
                   <span className="text-2xl font-bold">
-                    3
+                    {seats}
                   </span>
 
                   <button
                     className="w-10 h-10 rounded-full text-white"
-                    style={{
-                      backgroundColor: "#134688",
-                    }}
+                    style={{ backgroundColor: "#134688" }}
+                    onClick={() => setSeats(seats + 1)}
                   >
                     +
                   </button>
+
                 </div>
               </div>
 
@@ -213,14 +267,15 @@ export default function CreateRidePage() {
 
                 <input
                   type="number"
-                  defaultValue="25"
+                  value={fare}
+                  onChange={(e) => setFare(Number(e.target.value))}
                   className="mt-4 border rounded-xl p-3 w-full"
                 />
               </div>
 
               <div className="bg-white rounded-2xl border p-5">
                 <div className="flex items-center gap-3">
-                  <Car size={22} color="#134688;" />
+                  <Car size={22} color="#134688" />
 
                   <div>
                     <h4 className="font-bold">
@@ -234,10 +289,9 @@ export default function CreateRidePage() {
                 </div>
               </div>
 
-              {/* Publish Button */}
-              <Link href="/my_rides" className="w-full block">
               <button
                 type="button"
+                onClick={publishRide}
                 className="w-full py-4 rounded-2xl text-white font-bold text-lg mt-6 mb-8"
                 style={{
                   backgroundColor: "#134688",
@@ -245,11 +299,12 @@ export default function CreateRidePage() {
               >
                 Publish Ride 🚀
               </button>
-            </Link>
+
             </div>
           </div>
         </div>
+
       </div>
-      </div>
-        );
+    </div>
+  );
 }
